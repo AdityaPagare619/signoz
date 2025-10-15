@@ -97,6 +97,7 @@ function ListView({
 			? cloneDeep(stagedQuery)
 			: cloneDeep(initialQueriesMap.traces);
 
+		// Main: Server-side sorting via orderBy parameter
 		if (query.builder.queryData[0]) {
 			query.builder.queryData[0].orderBy = [
 				{
@@ -105,8 +106,6 @@ function ListView({
 				},
 			];
 		}
-
-		// add order by to trace operator
 		if (
 			query.builder.queryTraceOperator &&
 			query.builder.queryTraceOperator.length > 0
@@ -118,7 +117,6 @@ function ListView({
 				},
 			];
 		}
-
 		return query;
 	}, [stagedQuery, orderBy]);
 
@@ -160,12 +158,10 @@ function ListView({
 				selectColumns: options?.selectColumns,
 			},
 		},
-		// ENTITY_VERSION_V4,
 		ENTITY_VERSION_V5,
 		{
 			queryKey,
 			enabled:
-				// don't make api call while the time range state in redux is loading
 				!timeRangeUpdateLoading &&
 				!!stagedQuery &&
 				panelType === PANEL_TYPES.LIST &&
@@ -177,7 +173,6 @@ function ListView({
 		if (data?.payload) {
 			setWarning(data?.warning);
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [data?.payload, data?.warning]);
 
 	useEffect(() => {
@@ -199,6 +194,7 @@ function ListView({
 
 	const { formatTimezoneAdjustedTimestamp } = useTimezone();
 
+	// Here: getListColumns fetches new enterprise-grade utilities (sorting etc.)
 	const columns = useMemo(() => {
 		const updatedColumns = getListColumns(
 			options?.selectColumns || [],
@@ -235,11 +231,10 @@ function ListView({
 			!isError &&
 			transformedQueryTableData.length !== 0
 		) {
-			logEvent('Traces Explorer: Data present', {
-				panelType,
-			});
+			logEvent('Traces Explorer: Data present', { panelType });
 		}
 	}, [isLoading, isFetching, isError, transformedQueryTableData, panelType]);
+
 	return (
 		<Container>
 			{transformedQueryTableData.length !== 0 && (
